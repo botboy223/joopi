@@ -1,0 +1,19 @@
+{
+    "users": [
+        {
+            "username": "user1",
+            "password": "pass123",
+            "ips": ["103.174.159.208", "103.38.68.210"]
+        },
+        {
+            "username": "user2",
+            "password": "secure456",
+            "ips": ["203.0.113.5"]
+        },
+        {
+            "username": "admin",
+            "password": "adminpass",
+            "ips": ["198.51.100.10", "10.0.0.2"]
+        }
+    ]
+}
