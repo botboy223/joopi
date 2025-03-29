@@ -1,40 +1,15 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <style>
-        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f4; }
-        .login-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        input { display: block; width: 100%; margin: 10px 0; padding: 8px; }
-        button { background: blue; color: white; padding: 10px; border: none; cursor: pointer; }
-    </style>
+    <title>IP Authentication</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
 </head>
 <body>
-    <div class="login-container">
-        <h2>Login</h2>
-        <input type="text" id="username" placeholder="Username">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="login()">Login</button>
-        <p id="error" style="color: red;"></p>
+    <div id="auth-container">
+        <p>Checking authorization...</p>
     </div>
-
-    <script>
-        const users = { "admin": "1234", "user": "password" };
-
-        function login() {
-            let username = document.getElementById('username').value;
-            let password = document.getElementById('password').value;
-            
-            if (users[username] && users[username] === password) {
-                localStorage.setItem('loggedInUser', username);
-                window.location.href = 'web.html';
-            } else {
-                document.getElementById('error').innerText = 'Invalid login credentials';
-            }
-        }
-    </script>
 </body>
 </html>
