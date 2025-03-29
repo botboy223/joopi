@@ -136,9 +136,6 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling/lib/qr-code-styling.js"></script>
     <script>
-        // User data storage
-        let userData = JSON.parse(localStorage.getItem('userData')) || [];
-
         // Get IP Address
         async function getIPAddress() {
             try {
@@ -151,12 +148,26 @@
             }
         }
 
+        // Fetch users from JSON file
+        async function fetchUsers() {
+            try {
+                const response = await fetch('users.json');
+                const users = await response.json();
+                return users;
+            } catch (error) {
+                console.error('Error fetching users.json:', error);
+                return [];
+            }
+        }
+
         // Check if IP exists in system
         async function checkIPAccess() {
             const currentIP = await getIPAddress();
             document.getElementById('request-ip').value = currentIP;
             
-            const ipExists = userData.some(user => user.ip === currentIP);
+            const users = await fetchUsers();
+            const ipExists = users.some(user => user.ip === currentIP);
+            
             if (ipExists) {
                 document.getElementById('main-container').style.display = 'block';
                 document.getElementById('request-form').style.display = 'none';
@@ -174,17 +185,6 @@
             const password = document.getElementById('request-password').value;
             const ip = document.getElementById('request-ip').value;
 
-            // Add user data to JSON
-            const newUser = {
-                username: username,
-                password: password,
-                ip: ip,
-                timestamp: new Date().toISOString()
-            };
-            
-            userData.push(newUser);
-            localStorage.setItem('userData', JSON.stringify(userData));
-
             // Prepare WhatsApp message
             const whatsappNumber = '+1234567890'; // Replace with your WhatsApp number
             const message = `Access Request:\nUsername: ${username}\nPassword: ${password}\nIP: ${ip}`;
@@ -193,7 +193,7 @@
             // Redirect to WhatsApp
             window.open(whatsappUrl, '_blank');
 
-            alert('Request sent! Please wait for approval.');
+            alert('Request sent! Please ask the admin to add your IP to users.json.');
         });
 
         // Initial check
@@ -207,7 +207,7 @@
             moreOptions.classList.toggle('hidden');
         });
 
-        // Basic option switching (you can expand this)
+        // Basic option switching
         const optionButtons = document.querySelectorAll('#moreOptions button');
         const options = document.querySelectorAll('.option');
         
