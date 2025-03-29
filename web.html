@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .logout { background: red; color: white; padding: 10px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Welcome, <span id="username"></span>!</h2>
+    <button class="logout" onclick="logout()">Logout</button>
+    
+    <script>
+        let user = localStorage.getItem('loggedInUser');
+        if (!user) {
+            window.location.href = 'index.html';
+        } else {
+            document.getElementById('username').innerText = user;
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedInUser');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
