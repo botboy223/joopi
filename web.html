@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>QR Code Scanner / Reader</title>
+    <script>
+        let approvedUsers = JSON.parse(localStorage.getItem("approvedUsers")) || [];
+
+        async function getUniqueAddress() {
+            return new Promise(resolve => {
+                Fingerprint2.get(function (components) {
+                    let fingerprint = Fingerprint2.x64hash128(components.map(p => p.value).join(''), 31);
+                    resolve(fingerprint);
+                });
+            });
+        }
+
+        async function checkAccess() {
+            let uniqueAddress = await getUniqueAddress();
+            if (!approvedUsers.includes(uniqueAddress)) {
+                alert("❌ Unauthorized! Redirecting to login...");
+                window.location.href = "index.html";
+            }
+        }
+
+        checkAccess();
+    </script>
 </head>
 <body>
     <div class="container">
