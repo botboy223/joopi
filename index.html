@@ -3,15 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Authorization</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Authorization System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f4f4f4;
+            padding: 50px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Authorization System</h1>
         <p><strong>Your Unique Address:</strong> <span id="uniqueAddress">Detecting...</span></p>
         <p id="statusMessage">Checking authorization...</p>
-        
+
         <div id="requestForm" style="display: none;">
             <h2>Request Authorization</h2>
             <input type="text" id="userID" placeholder="Enter User ID">
@@ -21,6 +47,55 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/2.1.4/fingerprint2.min.js"></script>
-    <script src="script.js"></script>
+    <script>
+        const userJson = {
+            "users": [
+                { "userID": "12345-abcde", "password": "mypassword", "uniqueAddress": "abc123xyz" },
+                { "userID": "67890-fghij", "password": "securepass", "uniqueAddress": "def456uvw" }
+            ]
+        };
+
+        async function getUniqueAddress() {
+            return new Promise(resolve => {
+                Fingerprint2.get(function (components) {
+                    let fingerprint = Fingerprint2.x64hash128(components.map(p => p.value).join(''), 31);
+
+                    fetch("https://api64.ipify.org?format=json")
+                        .then(response => response.json())
+                        .then(data => {
+                            let uniqueAddress = fingerprint + "-" + data.ip;
+                            document.getElementById("uniqueAddress").textContent = uniqueAddress;
+                            resolve(uniqueAddress);
+                        });
+                });
+            });
+        }
+
+        async function checkAuthorization() {
+            let uniqueAddress = await getUniqueAddress();
+            let authorized = userJson.users.some(user => user.uniqueAddress === uniqueAddress);
+
+            if (authorized) {
+                window.location.href = "web.html";
+            } else {
+                document.getElementById("statusMessage").textContent = "Unauthorized! Request access below.";
+                document.getElementById("requestForm").style.display = "block";
+            }
+        }
+
+        function requestAccess() {
+            let userID = document.getElementById("userID").value;
+            let password = document.getElementById("password").value;
+            let uniqueAddress = document.getElementById("uniqueAddress").textContent;
+
+            let message = `🔐 New Authorization Request:\n\n📌 User ID: ${userID}\n🔑 Password: ${password}\n🖥️ Unique Address: ${uniqueAddress}`;
+            let whatsappURL = `https://api.whatsapp.com/send?phone=YOUR_PHONE_NUMBER&text=${encodeURIComponent(message)}`;
+            window.open(whatsappURL, "_blank");
+
+            document.getElementById("statusMessage").textContent = "Request sent! Wait for manual approval.";
+        }
+
+        checkAuthorization();
+    </script>
 </body>
 </html>
