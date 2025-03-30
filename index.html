@@ -48,60 +48,25 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/2.1.4/fingerprint2.min.js"></script>
     <script>
-        const userJson = {
-            "users": [
-                { "userID": "12345-abcde", "password": "mypassword", "uniqueAddress": "45b6bfef01a12e2e8e49b020447a9cdd" },
-                { "userID": "67890-fghij", "password": "securepass", "uniqueAddress": "abcd1234xyz0987" }
-            ]
-        };
+        let approvedUsers = JSON.parse(localStorage.getItem("approvedUsers")) || [];
 
         async function getUniqueAddress() {
             return new Promise(resolve => {
                 Fingerprint2.get(function (components) {
                     let fingerprint = Fingerprint2.x64hash128(components.map(p => p.value).join(''), 31);
-
-                    // Store Unique ID in IndexedDB
-                    if (window.indexedDB) {
-                        let dbRequest = indexedDB.open("UserDB", 1);
-                        dbRequest.onupgradeneeded = function(event) {
-                            let db = event.target.result;
-                            db.createObjectStore("UserStore", { keyPath: "id" });
-                        };
-                        dbRequest.onsuccess = function(event) {
-                            let db = event.target.result;
-                            let transaction = db.transaction("UserStore", "readwrite");
-                            let store = transaction.objectStore("UserStore");
-
-                            store.get("uniqueID").onsuccess = function(e) {
-                                let storedID = e.target.result;
-                                if (!storedID) {
-                                    store.add({ id: "uniqueID", value: fingerprint });
-                                } else {
-                                    fingerprint = storedID.value;
-                                }
-                                document.getElementById("uniqueAddress").textContent = fingerprint;
-                                resolve(fingerprint);
-                            };
-                        };
-                    } else {
-                        document.getElementById("uniqueAddress").textContent = fingerprint;
-                        resolve(fingerprint);
-                    }
+                    document.getElementById("uniqueAddress").textContent = fingerprint;
+                    resolve(fingerprint);
                 });
             });
         }
 
         async function checkAuthorization() {
             let uniqueAddress = await getUniqueAddress();
-            document.getElementById("uniqueAddress").textContent = uniqueAddress;
 
-            let authorized = userJson.users.some(user => user.uniqueAddress === uniqueAddress);
-
+            let authorized = approvedUsers.includes(uniqueAddress);
             if (authorized) {
                 document.getElementById("statusMessage").textContent = "✅ Access Granted! Redirecting...";
-                setTimeout(() => {
-                    window.location.href = "web.html";
-                }, 2000);
+                setTimeout(() => { window.location.href = "web.html"; }, 2000);
             } else {
                 document.getElementById("statusMessage").textContent = "❌ Unauthorized! Request access below.";
                 document.getElementById("requestForm").style.display = "block";
