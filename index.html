@@ -50,8 +50,8 @@
     <script>
         const userJson = {
             "users": [
-                { "userID": "12345-abcde", "password": "mypassword", "uniqueAddress": "abc123xyz" },
-                { "userID": "67890-fghij", "password": "securepass", "uniqueAddress": "32da70c2aa65f39bba8bfb182566bdfc-203.192.238.41" }
+                { "userID": "12345-abcde", "password": "mypassword", "uniqueAddress": "45b6bfef01a12e2e8e49b020447a9cdd" },
+                { "userID": "67890-fghij", "password": "securepass", "uniqueAddress": "abcd1234xyz0987" }
             ]
         };
 
@@ -60,13 +60,33 @@
                 Fingerprint2.get(function (components) {
                     let fingerprint = Fingerprint2.x64hash128(components.map(p => p.value).join(''), 31);
 
-                    fetch("https://api64.ipify.org?format=json")
-                        .then(response => response.json())
-                        .then(data => {
-                            let uniqueAddress = fingerprint + "-" + data.ip;
-                            document.getElementById("uniqueAddress").textContent = uniqueAddress;
-                            resolve(uniqueAddress);
-                        });
+                    // Save Unique ID in IndexedDB for Persistence
+                    if (window.indexedDB) {
+                        let dbRequest = indexedDB.open("UserDB", 1);
+                        dbRequest.onupgradeneeded = function(event) {
+                            let db = event.target.result;
+                            db.createObjectStore("UserStore", { keyPath: "id" });
+                        };
+                        dbRequest.onsuccess = function(event) {
+                            let db = event.target.result;
+                            let transaction = db.transaction("UserStore", "readwrite");
+                            let store = transaction.objectStore("UserStore");
+
+                            store.get("uniqueID").onsuccess = function(e) {
+                                let storedID = e.target.result;
+                                if (!storedID) {
+                                    store.add({ id: "uniqueID", value: fingerprint });
+                                } else {
+                                    fingerprint = storedID.value;
+                                }
+                                document.getElementById("uniqueAddress").textContent = fingerprint;
+                                resolve(fingerprint);
+                            };
+                        };
+                    } else {
+                        document.getElementById("uniqueAddress").textContent = fingerprint;
+                        resolve(fingerprint);
+                    }
                 });
             });
         }
