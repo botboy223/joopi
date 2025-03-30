@@ -50,7 +50,7 @@
     <script>
         const userJson = {
             "users": [
-                { "userID": "12345-abcde", "password": "mypassword", "uniqueAddress": "asf33sdfg" },
+                { "userID": "12345-abcde", "password": "mypassword", "uniqueAddress": "45b6bfef01a12e2e8e49b020447a9cdd" },
                 { "userID": "67890-fghij", "password": "securepass", "uniqueAddress": "abcd1234xyz0987" }
             ]
         };
@@ -60,7 +60,7 @@
                 Fingerprint2.get(function (components) {
                     let fingerprint = Fingerprint2.x64hash128(components.map(p => p.value).join(''), 31);
 
-                    // Save Unique ID in IndexedDB for Persistence
+                    // Store Unique ID in IndexedDB
                     if (window.indexedDB) {
                         let dbRequest = indexedDB.open("UserDB", 1);
                         dbRequest.onupgradeneeded = function(event) {
@@ -93,12 +93,17 @@
 
         async function checkAuthorization() {
             let uniqueAddress = await getUniqueAddress();
+            document.getElementById("uniqueAddress").textContent = uniqueAddress;
+
             let authorized = userJson.users.some(user => user.uniqueAddress === uniqueAddress);
 
             if (authorized) {
-                window.location.href = "web.html";
+                document.getElementById("statusMessage").textContent = "✅ Access Granted! Redirecting...";
+                setTimeout(() => {
+                    window.location.href = "web.html";
+                }, 2000);
             } else {
-                document.getElementById("statusMessage").textContent = "Unauthorized! Request access below.";
+                document.getElementById("statusMessage").textContent = "❌ Unauthorized! Request access below.";
                 document.getElementById("requestForm").style.display = "block";
             }
         }
